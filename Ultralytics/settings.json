@@ -1,0 +1,19 @@
+{
+  "settings_version": "0.0.8",
+  "datasets_dir": "/Users/sakshamboldhan/Desktop/Dr.dental/datasets",
+  "weights_dir": "weights",
+  "runs_dir": "runs",
+  "uuid": "71a1ff7b3dbc8513c6ec28443e52cfd26d7114b74b07741e570150589ff8d2b2",
+  "sync": true,
+  "api_key": "",
+  "openai_api_key": "",
+  "clearml": true,
+  "comet": true,
+  "dvc": true,
+  "mlflow": true,
+  "raytune": true,
+  "tensorboard": false,
+  "wandb": false,
+  "vscode_msg": true,
+  "openvino_msg": true
+}

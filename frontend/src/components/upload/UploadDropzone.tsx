@@ -2,8 +2,6 @@ import React, { useState, useRef, useCallback } from 'react';
 import {
   UploadCloud,
   FileImage,
-  X,
-  Sparkles,
   AlertCircle,
   RotateCcw,
 } from 'lucide-react';
@@ -28,7 +26,6 @@ export interface DropzoneState {
   setDiseaseConf: (v: number) => void;
   handleFile: (f: File) => void;
   handleRemove: () => void;
-  handleSampleScan: () => void;
   handleDrag: (e: React.DragEvent) => void;
   handleDrop: (e: React.DragEvent) => void;
   fileInputRef: React.RefObject<HTMLInputElement>;
@@ -77,17 +74,6 @@ export function useDropzoneState(): DropzoneState {
     if (fileInputRef.current) fileInputRef.current.value = '';
   }, []);
 
-  const handleSampleScan = useCallback(async () => {
-    try {
-      setErrorMsg(null);
-      const res = await fetch('/samples/sample_panoramic.jpg');
-      const blob = await res.blob();
-      handleFile(new File([blob], 'sample_panoramic.jpg', { type: 'image/jpeg' }));
-    } catch {
-      setErrorMsg('Could not load sample scan. Ensure the dev server is running.');
-    }
-  }, [handleFile]);
-
   const handleDrag = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -105,7 +91,7 @@ export function useDropzoneState(): DropzoneState {
     selectedFile, previewUrl, dimensions, dragActive, hasConsent, errorMsg,
     enumConf, diseaseConf,
     setHasConsent, setEnumConf, setDiseaseConf,
-    handleFile, handleRemove, handleSampleScan,
+    handleFile, handleRemove,
     handleDrag, handleDrop,
     fileInputRef, setErrorMsg,
   };
@@ -120,7 +106,7 @@ interface DropZoneProps {
 
 export const DropZone: React.FC<DropZoneProps> = ({ state }) => {
   const { dragActive, previewUrl, selectedFile, dimensions, handleDrag, handleDrop,
-    handleRemove, handleSampleScan, fileInputRef, handleFile } = state;
+    handleRemove, fileInputRef, handleFile } = state;
 
   if (previewUrl && selectedFile) {
     // ── Preview state: dark clinical viewer ────────────────────────────────
@@ -255,14 +241,6 @@ export const DropZone: React.FC<DropZoneProps> = ({ state }) => {
               className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-teal-600 to-teal-500 hover:from-teal-700 hover:to-teal-600 text-white text-sm font-bold shadow-md hover:shadow-lg transition-all duration-150 active:scale-[0.97]"
             >
               Browse Files
-            </button>
-            <button
-              type="button"
-              onClick={handleSampleScan}
-              className="px-6 py-2.5 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-sm font-semibold shadow-sm hover:shadow-md transition-all duration-150 active:scale-[0.97] flex items-center gap-2"
-            >
-              <Sparkles className="w-4 h-4 text-teal-500" />
-              Load Sample OPG
             </button>
           </div>
         </>

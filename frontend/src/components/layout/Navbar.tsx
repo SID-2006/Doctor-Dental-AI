@@ -1,21 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Activity, Menu, X } from 'lucide-react';
-import { apiClient } from '../../api/client';
-import { HealthResponse } from '../../types/api';
 
 export const Navbar: React.FC = () => {
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [health, setHealth] = useState<HealthResponse | null>(null);
-
-  useEffect(() => {
-    let isMounted = true;
-    apiClient.getHealth()
-      .then(data => { if (isMounted) setHealth(data); })
-      .catch(() => { if (isMounted) setHealth(null); });
-    return () => { isMounted = false; };
-  }, []);
 
   const navLinks = [
     { name: 'Home', path: '/' },
@@ -68,18 +57,6 @@ export const Navbar: React.FC = () => {
               </Link>
             ))}
           </nav>
-
-          {/* Right — system status chip only (no duplicate CTA button) */}
-          <div className="hidden sm:flex items-center">
-            <div className="flex items-center space-x-2 text-xs px-3 py-1.5 rounded-full border border-slate-200 bg-slate-50">
-              <span className={`w-2 h-2 rounded-full ${
-                health?.status === 'healthy' ? 'bg-emerald-500' : 'bg-amber-500 animate-pulse'
-              }`} />
-              <span className="text-slate-600 font-medium">
-                {health?.status === 'healthy' ? 'YOLO Models Ready' : 'Connecting Engine…'}
-              </span>
-            </div>
-          </div>
 
           {/* Mobile menu toggle */}
           <div className="md:hidden flex items-center">

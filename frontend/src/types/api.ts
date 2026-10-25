@@ -83,6 +83,88 @@ export interface AlignmentFinding {
   requires_assessment: boolean;
 }
 
+export interface OverlappingPair {
+  from_fdi: string;
+  to_fdi: string;
+  overlap_px: number;
+  overlap_ratio: number;
+  arch: string;
+  overlap_x1?: number;
+  overlap_x2?: number;
+  y1?: number;
+  y2?: number;
+  cx?: number;
+  cy?: number;
+}
+
+export interface CrowdingArchDetail {
+  arch: string;
+  teeth_count: number;
+  total_tooth_width_px: number;
+  available_arch_length_px: number;
+  space_discrepancy_px: number;
+  discrepancy_ratio: number;
+  severity: 'None' | 'Mild' | 'Moderate' | 'Severe';
+  overlapping_pairs: OverlappingPair[];
+}
+
+export interface CrowdingAnalysis {
+  has_crowding: boolean;
+  overall_severity: 'None' | 'Mild' | 'Moderate' | 'Severe';
+  upper_arch?: CrowdingArchDetail | null;
+  lower_arch?: CrowdingArchDetail | null;
+  overlapping_pairs: OverlappingPair[];
+  description: string;
+}
+
+export interface MidlineDiastema {
+  present: boolean;
+  arch?: string | null;
+  gap_px: number;
+  ratio: number;
+  teeth: string[];
+  description?: string | null;
+  x1?: number;
+  x2?: number;
+  y?: number;
+}
+
+export interface SpacingAnalysis {
+  has_spacing: boolean;
+  overall_severity: 'None' | 'Mild' | 'Moderate' | 'Generalized';
+  midline_diastema?: MidlineDiastema | null;
+  wide_spacing_count: number;
+  spaced_pairs: Array<{
+    from_fdi: string;
+    to_fdi: string;
+    gap_px: number;
+    ratio: number;
+    arch: string;
+    wide: boolean;
+    x1?: number;
+    x2?: number;
+    y?: number;
+  }>;
+  description: string;
+}
+
+export interface RotationFinding {
+  fdi: string;
+  anatomical_name: string;
+  arch: string;
+  aspect_ratio: number;
+  expected_ratio: number;
+  deviation_percent: number;
+  severity: 'Mild' | 'Moderate' | 'Marked';
+  description: string;
+  cx?: number;
+  cy?: number;
+  x1?: number;
+  y1?: number;
+  x2?: number;
+  y2?: number;
+}
+
 /** Result of the geometric tooth alignment screening module. */
 export interface AlignmentScreeningResult {
   sufficient_data: boolean;
@@ -92,7 +174,7 @@ export interface AlignmentScreeningResult {
   findings: AlignmentFinding[];
   /** Points along the estimated arch curve: [[x, y], ...] */
   arch_curve_points: [number, number][];
-  /** Tooth centres: { fdi, cx, cy, fitted_cy, deviation_px, deviation_normalized, arch } */
+  /** Tooth centres: { fdi, cx, cy, fitted_cy, deviation_px, deviation_normalized, arch, box } */
   tooth_centers: Array<{
     fdi: string;
     cx: number;
@@ -101,6 +183,14 @@ export interface AlignmentScreeningResult {
     deviation_px: number;
     deviation_normalized: number;
     arch: string;
+    box?: {
+      x1: number;
+      y1: number;
+      x2: number;
+      y2: number;
+      w: number;
+      h: number;
+    };
   }>;
   /** Spacing ratios between adjacent detected teeth */
   spacing_ratios: Array<{
@@ -110,7 +200,14 @@ export interface AlignmentScreeningResult {
     ratio: number;
     arch: string;
     wide: boolean;
+    x1?: number;
+    x2?: number;
+    y?: number;
   }>;
+  /** Extended orthodontic modules */
+  crowding?: CrowdingAnalysis | null;
+  spacing?: SpacingAnalysis | null;
+  rotations?: RotationFinding[];
   limitation_note: string;
   insufficient_data_reason?: string | null;
 }

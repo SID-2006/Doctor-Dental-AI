@@ -230,11 +230,40 @@ export const HomePage: React.FC = () => {
                 Dual-Model Active
               </span>
             </div>
-            <img
-              src="/samples/sample_panoramic.jpg"
-              alt="Dental panoramic X-ray"
-              className="w-full h-72 sm:h-[380px] object-cover opacity-90"
-            />
+            <div className="w-full h-full flex items-center justify-center bg-gradient-to-b from-slate-950 via-[#0d1527] to-slate-950 relative overflow-hidden">
+              {/* Simulated Panoramic Radiograph Scan Grid */}
+              <svg viewBox="0 0 800 500" className="w-full h-full object-cover opacity-70">
+                <defs>
+                  <radialGradient id="xrayGlow" cx="50%" cy="50%" r="50%">
+                    <stop offset="0%" stopColor="#38bdf8" stopOpacity="0.25" />
+                    <stop offset="60%" stopColor="#1e293b" stopOpacity="0.1" />
+                    <stop offset="100%" stopColor="#020617" stopOpacity="0.8" />
+                  </radialGradient>
+                </defs>
+                <rect width="800" height="500" fill="url(#xrayGlow)" />
+
+                {/* Upper Jaw Arch */}
+                <path d="M 120 220 Q 400 120 680 220" fill="none" stroke="#94a3b8" strokeWidth="18" strokeLinecap="round" opacity="0.4" />
+                {/* Lower Mandible Arch */}
+                <path d="M 150 320 Q 400 420 650 320" fill="none" stroke="#64748b" strokeWidth="22" strokeLinecap="round" opacity="0.35" />
+
+                {/* Upper Teeth silhouettes */}
+                {[170, 210, 250, 290, 330, 370, 410, 450, 490, 530, 570, 610].map((x, i) => (
+                  <rect key={`u-${i}`} x={x} y={170 + Math.abs(x - 390) * 0.12} width="22" height="34" rx="4" fill="#e2e8f0" opacity={0.65} />
+                ))}
+
+                {/* Lower Teeth silhouettes */}
+                {[190, 230, 270, 310, 350, 390, 430, 470, 510, 550, 590].map((x, i) => (
+                  <rect key={`l-${i}`} x={x} y={260 - Math.abs(x - 390) * 0.08} width="20" height="30" rx="3" fill="#cbd5e1" opacity={0.6} />
+                ))}
+
+                {/* AI Detection Bounding Boxes */}
+                <rect x="245" y="172" width="32" height="42" fill="rgba(16, 185, 129, 0.15)" stroke="#10b981" strokeWidth="1.5" rx="3" />
+                <rect x="445" y="172" width="32" height="42" fill="rgba(99, 102, 241, 0.15)" stroke="#6366f1" strokeWidth="1.5" rx="3" />
+                <rect x="525" y="180" width="34" height="44" fill="rgba(244, 63, 94, 0.2)" stroke="#f43f5e" strokeWidth="1.5" rx="3" />
+              </svg>
+            </div>
+
             {/* Floating stat chip */}
             <div className="absolute bottom-5 left-5 bg-white/95 backdrop-blur-sm rounded-2xl px-5 py-3 flex items-center gap-3.5 shadow-xl border border-slate-100">
               <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-700 flex items-center justify-center shadow-md">
@@ -269,10 +298,10 @@ export const HomePage: React.FC = () => {
           {/* 2×2 feature grid */}
           <div className="grid grid-cols-2 gap-4">
             {[
-              { icon: HeartPulse, title: 'Best Medical Service',  desc: 'Our AI delivers trusted, compassionate dental diagnostics.' },
-              { icon: Cpu,        title: 'Expert AI Analysis',    desc: 'Dual YOLO11m models trained on dental clinical datasets.' },
-              { icon: Clock,      title: 'Instant Results',       desc: 'Full analysis with interactive viewer in under 300 ms.' },
-              { icon: Video,      title: 'Clinical PDF Report',   desc: 'Downloadable report with structured restoration guidance.' },
+              { icon: HeartPulse, title: 'Best Medical Service', desc: 'Our AI delivers trusted, compassionate dental diagnostics.' },
+              { icon: Cpu, title: 'Expert AI Analysis', desc: 'Dual YOLO11m models trained on dental clinical datasets.' },
+              { icon: Clock, title: 'Instant Results', desc: 'Full analysis with interactive viewer in under 300 ms.' },
+              { icon: Video, title: 'Clinical PDF Report', desc: 'Downloadable report with structured restoration guidance.' },
             ].map((f, i) => (
               <div
                 key={i}
@@ -317,10 +346,10 @@ export const HomePage: React.FC = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
-              { icon: Layers,   title: 'Tooth Enumeration',  desc: 'Automatic FDI numbering of all detected teeth in the panoramic radiograph.',            badge: '32 Classes',     color: 'from-indigo-500 to-violet-600' },
-              { icon: Search,   title: 'Disease Screening',  desc: 'AI-driven detection of caries, periapical lesions and impacted teeth.',                  badge: '4 Pathologies',  color: 'from-pink-500 to-rose-600' },
-              { icon: Eye,      title: 'Interactive Viewer',  desc: 'Zoomable multi-layer SVG overlay with synchronized tooth selection.',                    badge: 'Real-time',      color: 'from-amber-500 to-orange-500' },
-              { icon: FileText, title: 'Clinical Reports',   desc: 'Downloadable PDF with restoration guidance and alignment screening.',                    badge: 'Instant PDF',    color: 'from-teal-500 to-emerald-600' },
+              { icon: Layers, title: 'Tooth Enumeration', desc: 'Automatic FDI numbering of all detected teeth in the panoramic radiograph.', badge: '32 Classes', color: 'from-indigo-500 to-violet-600' },
+              { icon: Search, title: 'Disease Screening', desc: 'AI-driven detection of caries, periapical lesions and impacted teeth.', badge: '4 Pathologies', color: 'from-pink-500 to-rose-600' },
+              { icon: Eye, title: 'Interactive Viewer', desc: 'Zoomable multi-layer SVG overlay with synchronized tooth selection.', badge: 'Real-time', color: 'from-amber-500 to-orange-500' },
+              { icon: FileText, title: 'Clinical Reports', desc: 'Downloadable PDF with restoration guidance and alignment screening.', badge: 'Instant PDF', color: 'from-teal-500 to-emerald-600' },
             ].map((s, i) => (
               <div
                 key={i}
@@ -362,10 +391,10 @@ export const HomePage: React.FC = () => {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {[
-            { step: '01', title: 'Upload Radiograph',    desc: 'Upload any panoramic OPG or bitewing X-ray in JPG or PNG format.',                   icon: ScanLine },
+            { step: '01', title: 'Upload Radiograph', desc: 'Upload any panoramic OPG or bitewing X-ray in JPG or PNG format.', icon: ScanLine },
             { step: '02', title: 'Dual-Model Inference', desc: 'Parallel YOLO11m models execute enumeration and disease detection in < 300 ms.', icon: Cpu },
-            { step: '03', title: 'Spatial Association',  desc: 'IoA matching automatically links detected lesions to specific FDI tooth numbers.',   icon: Layers },
-            { step: '04', title: 'Clinical PDF Report',  desc: 'Review structured restoration guidance and download the clinical report.',            icon: ShieldCheck },
+            { step: '03', title: 'Spatial Association', desc: 'IoA matching automatically links detected lesions to specific FDI tooth numbers.', icon: Layers },
+            { step: '04', title: 'Clinical PDF Report', desc: 'Review structured restoration guidance and download the clinical report.', icon: ShieldCheck },
           ].map((w, i) => (
             <div
               key={i}

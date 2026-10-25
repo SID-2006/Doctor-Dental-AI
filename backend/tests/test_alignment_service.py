@@ -190,3 +190,68 @@ class TestLimitationNotice:
         # Insufficient data
         result_bad = svc.generate_alignment_report([])
         assert len(result_bad.limitation_note) > 50
+
+
+class TestCrowdingAnalysis:
+    def test_no_crowding_on_spaced_arch(self):
+        svc = AlignmentService()
+        teeth = make_upper_arch_teeth(6)
+        result = svc.generate_alignment_report(teeth)
+        assert result.crowding is not None
+        assert result.crowding.overall_severity in ("None", "Mild")
+
+    def test_crowding_detected_on_overlapping_teeth(self):
+        svc = AlignmentService()
+        teeth = make_upper_arch_teeth(6)
+        # Force consecutive teeth to significantly overlap
+        for i in range(len(teeth) - 1):
+            teeth[i].box.x2 = teeth[i + 1].box.x1 + 25  # 25px overlap on 40px width teeth (>50%)
+        result = svc.generate_alignment_report(teeth)
+        assert result.crowding is not None
+        assert result.crowding.has_crowding is True
+        assert result.crowding.overall_severity in ("Moderate", "Severe")
+        assert len(result.crowding.overlapping_pairs) > 0
+        assert result.crowding.overlapping_pairs[0].overlap_px > 0
+
+
+class TestMidlineDiastemaAndSpacing:
+    def test_midline_diastema_detected(self):
+        svc = AlignmentService()
+        teeth = make_upper_arch_teeth(6)
+        # In make_upper_arch_teeth(6), teeth[0] is 11, teeth[1] is 12, etc.
+        # Let's create an explicit 11 and 21 pair with a wide gap
+        t11 = make_tooth("11", x1=200, y1=200, x2=240, y2=250, quadrant=1)
+        t21 = make_tooth("21", x1=265, y1=200, x2=305, y2=250, quadrant=2)
+        t12 = make_tooth("12", x1=150, y1=205, x2=190, y2=255, quadrant=1)
+        t22 = make_tooth("22", x1=315, y1=205, x2=355, y2=255, quadrant=2)
+        arch = [t12, t11, t21, t22]
+
+        result = svc.generate_alignment_report(arch)
+        assert result.spacing is not None
+        assert result.spacing.has_spacing is True
+        assert result.spacing.midline_diastema is not None
+        assert result.spacing.midline_diastema.present is True
+        assert result.spacing.midline_diastema.gap_px >= 20.0
+
+
+class TestRotationScreening:
+    def test_rotation_flagged_for_extreme_aspect_ratio(self):
+        svc = AlignmentService()
+        teeth = make_upper_arch_teeth(6)
+        # Tooth 12 normal expected aspect ratio is ~0.64 (width/height)
+        # Make tooth 12 abnormally narrow (e.g. width 15, height 60 -> aspect ratio 0.25, >60% deviation)
+        teeth[1].box.x1 = 150
+        teeth[1].box.x2 = 165
+        teeth[1].box.y1 = 180
+        teeth[1].box.y2 = 240
+        teeth[1].box.width = 15
+        teeth[1].box.height = 60
+
+        result = svc.generate_alignment_report(teeth)
+        assert len(result.rotations) >= 1
+        flagged_fdis = [r.fdi for r in result.rotations]
+        assert "12" in flagged_fdis
+        finding_12 = next(r for r in result.rotations if r.fdi == "12")
+        assert finding_12.severity in ("Moderate", "Marked")
+        assert "rotation" in finding_12.description.lower()
+

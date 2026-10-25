@@ -64,10 +64,24 @@ function buildNextSteps(
       why: 'One or more teeth show position consistent with impaction.',
     });
   }
-  if (alignment?.sufficient_data && alignment.flagged_count > 0) {
+
+  const hasOrthoFindings =
+    alignment?.sufficient_data &&
+    (alignment.flagged_count > 0 ||
+      (alignment.crowding?.has_crowding && alignment.crowding.overall_severity !== 'None') ||
+      (alignment.rotations && alignment.rotations.length > 0) ||
+      alignment.spacing?.midline_diastema?.present);
+
+  if (hasOrthoFindings && alignment) {
+    const reasons: string[] = [];
+    if (alignment.flagged_count > 0) reasons.push(`${alignment.flagged_count} arch curve region(s)`);
+    if (alignment.crowding?.has_crowding && alignment.crowding.overall_severity !== 'None') reasons.push(`${alignment.crowding.overall_severity.toLowerCase()} crowding`);
+    if (alignment.spacing?.midline_diastema?.present) reasons.push('midline diastema');
+    if (alignment.rotations && alignment.rotations.length > 0) reasons.push(`${alignment.rotations.length} suspected rotated tooth/teeth`);
+
     steps.push({
       text: 'Orthodontic / alignment consultation',
-      why: `${alignment.flagged_count} region(s) flagged in preliminary geometric screening.`,
+      why: `Preliminary screening identified ${reasons.join(', ')}.`,
     });
   }
   if (steps.length === 0) {
@@ -175,17 +189,33 @@ export const ClinicalSummary: React.FC<ClinicalSummaryProps> = ({ analysis }) =>
         ) : (
           <div className="space-y-2">
             {/* Summary badges */}
-            <div className="flex flex-wrap gap-2 text-xs">
-              <span className="bg-slate-100 text-slate-700 border border-slate-200 px-2 py-0.5 rounded-full font-medium">
-                {alignment_screening.teeth_analyzed} teeth analysed
+            <div className="flex flex-wrap gap-1.5 text-xs">
+              <span className="bg-slate-100 text-slate-700 border border-slate-200 px-2 py-0.5 rounded-full font-medium text-[11px]">
+                {alignment_screening.teeth_analyzed} teeth
               </span>
               {alignment_screening.flagged_count > 0 ? (
-                <span className="bg-amber-100 text-amber-800 border border-amber-200 px-2 py-0.5 rounded-full font-semibold">
-                  {alignment_screening.flagged_count} region{alignment_screening.flagged_count > 1 ? 's' : ''} flagged
+                <span className="bg-amber-100 text-amber-800 border border-amber-200 px-2 py-0.5 rounded-full font-semibold text-[11px]">
+                  {alignment_screening.flagged_count} curve dev
                 </span>
               ) : (
-                <span className="bg-emerald-100 text-emerald-800 border border-emerald-200 px-2 py-0.5 rounded-full font-medium">
-                  No regions flagged
+                <span className="bg-emerald-100 text-emerald-800 border border-emerald-200 px-2 py-0.5 rounded-full font-medium text-[11px]">
+                  Arch normal
+                </span>
+              )}
+
+              {alignment_screening.crowding?.has_crowding && alignment_screening.crowding.overall_severity !== 'None' && (
+                <span className="bg-amber-50 text-amber-800 border border-amber-200 px-2 py-0.5 rounded font-medium text-[11px]">
+                  {alignment_screening.crowding.overall_severity} Crowding
+                </span>
+              )}
+              {alignment_screening.spacing?.midline_diastema?.present && (
+                <span className="bg-indigo-50 text-indigo-800 border border-indigo-200 px-2 py-0.5 rounded font-medium text-[11px]">
+                  Diastema
+                </span>
+              )}
+              {(alignment_screening.rotations?.length ?? 0) > 0 && (
+                <span className="bg-purple-50 text-purple-800 border border-purple-200 px-2 py-0.5 rounded font-medium text-[11px]">
+                  {alignment_screening.rotations?.length} Rotations
                 </span>
               )}
             </div>

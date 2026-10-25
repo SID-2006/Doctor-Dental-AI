@@ -289,6 +289,37 @@ class ReportService:
                         body_text,
                     ))
 
+                # Extended Orthodontic Screening (Crowding, Spacing, Rotations)
+                if al.crowding or al.spacing or al.rotations:
+                    story.append(Spacer(1, 4))
+                    if al.crowding:
+                        crowd_color = "#DC2626" if al.crowding.overall_severity in ("Moderate", "Severe") else "#16A34A"
+                        story.append(Paragraph(
+                            f"• <b>Crowding Screening:</b> <font color='{crowd_color}'>{al.crowding.overall_severity}</font> — {al.crowding.description}",
+                            body_text,
+                        ))
+                        story.append(Spacer(1, 2))
+                    if al.spacing:
+                        space_color = "#D97706" if al.spacing.has_spacing else "#16A34A"
+                        story.append(Paragraph(
+                            f"• <b>Spacing Screening:</b> <font color='{space_color}'>{al.spacing.overall_severity}</font> — {al.spacing.description}",
+                            body_text,
+                        ))
+                        story.append(Spacer(1, 2))
+                    if al.rotations:
+                        rot_teeth = ", ".join([f"FDI {r.fdi} ({r.severity})" for r in al.rotations[:5]])
+                        story.append(Paragraph(
+                            f"• <b>Suspected Tooth Rotations ({len(al.rotations)}):</b> {rot_teeth}",
+                            body_text,
+                        ))
+                        story.append(Spacer(1, 2))
+                    else:
+                        story.append(Paragraph(
+                            "• <b>Tooth Rotation Screening:</b> No significant axial rotation or aspect-ratio anomalies flagged.",
+                            body_text,
+                        ))
+                        story.append(Spacer(1, 2))
+
             story.append(Paragraph(al.limitation_note, disclaimer_style))
             story.append(Spacer(1, 10))
 

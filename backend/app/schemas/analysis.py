@@ -127,6 +127,81 @@ class AlignmentFinding(BaseModel):
     description: str               # plain-language explanation of the finding
     requires_assessment: bool      # whether clinical orthodontic assessment is suggested
 
+class OverlappingPair(BaseModel):
+    """A pair of adjacent teeth whose 2D bounding boxes overlap horizontally."""
+    from_fdi: str
+    to_fdi: str
+    overlap_px: float
+    overlap_ratio: float           # overlap_px / median_width
+    arch: str
+    # Coordinates for visual overlay on X-ray
+    overlap_x1: float = 0.0
+    overlap_x2: float = 0.0
+    y1: float = 0.0
+    y2: float = 0.0
+    cx: float = 0.0
+    cy: float = 0.0
+
+class CrowdingArchDetail(BaseModel):
+    """Arch-length discrepancy and crowding analysis for a single arch."""
+    arch: str                      # "upper" or "lower"
+    teeth_count: int
+    total_tooth_width_px: float
+    available_arch_length_px: float
+    space_discrepancy_px: float    # available - required (negative = crowding / space deficit)
+    discrepancy_ratio: float       # space_discrepancy_px / available_arch_length_px
+    severity: str                  # "None", "Mild", "Moderate", "Severe"
+    overlapping_pairs: List[OverlappingPair] = Field(default_factory=list)
+
+class CrowdingAnalysis(BaseModel):
+    """Comprehensive 2D geometric arch-length crowding assessment."""
+    has_crowding: bool
+    overall_severity: str          # "None", "Mild", "Moderate", "Severe"
+    upper_arch: Optional[CrowdingArchDetail] = None
+    lower_arch: Optional[CrowdingArchDetail] = None
+    overlapping_pairs: List[OverlappingPair] = Field(default_factory=list)
+    description: str
+
+class MidlineDiastema(BaseModel):
+    """Specific spacing detection at the dental midline."""
+    present: bool
+    arch: Optional[str] = None     # "upper" (11-21) or "lower" (31-41)
+    gap_px: float = 0.0
+    ratio: float = 0.0
+    teeth: List[str] = Field(default_factory=list)
+    description: Optional[str] = None
+    # Coordinates for visual caliper on X-ray
+    x1: float = 0.0
+    x2: float = 0.0
+    y: float = 0.0
+
+class SpacingAnalysis(BaseModel):
+    """Comprehensive interdental spacing and diastema screening."""
+    has_spacing: bool
+    overall_severity: str          # "None", "Mild", "Moderate", "Generalized"
+    midline_diastema: Optional[MidlineDiastema] = None
+    wide_spacing_count: int = 0
+    spaced_pairs: List[Dict[str, Any]] = Field(default_factory=list)
+    description: str
+
+class RotationFinding(BaseModel):
+    """A tooth flagged for suspected axial rotation or coronal tipping."""
+    fdi: str
+    anatomical_name: str
+    arch: str                      # "upper" or "lower"
+    aspect_ratio: float            # measured box width / box height
+    expected_ratio: float          # typical anatomical aspect ratio on OPG
+    deviation_percent: float       # percentage deviation from expected
+    severity: str                  # "Mild", "Moderate", "Marked"
+    description: str
+    # Coordinates for visual bounding marker on X-ray
+    cx: float = 0.0
+    cy: float = 0.0
+    x1: float = 0.0
+    y1: float = 0.0
+    x2: float = 0.0
+    y2: float = 0.0
+
 class AlignmentScreeningResult(BaseModel):
     """Result of the geometric tooth alignment screening module."""
     sufficient_data: bool          # False if <4 teeth detected per arch
@@ -140,12 +215,15 @@ class AlignmentScreeningResult(BaseModel):
     tooth_centers: List[Dict[str, Any]] = Field(default_factory=list)
     # Spacing ratios between adjacent teeth (normalized by avg tooth width)
     spacing_ratios: List[Dict[str, Any]] = Field(default_factory=list)
+    # Extended orthodontic screening modules
+    crowding: Optional[CrowdingAnalysis] = None
+    spacing: Optional[SpacingAnalysis] = None
+    rotations: List[RotationFinding] = Field(default_factory=list)
     limitation_note: str = (
         "This is a preliminary 2D geometric screening based on panoramic X-ray bounding-box detections only. "
-        "It does not constitute a validated orthodontic diagnostic assessment. "
-        "Panoramic radiographs have inherent distortion and do not support reliable measurement of "
-        "crowding, rotation, crossbite, overbite, or overjet. All findings require evaluation by a "
-        "qualified dental or orthodontic professional."
+        "It provides preliminary geometric estimates for crowding, spacing, and tooth rotation based on arch-length "
+        "and tooth aspect-ratio approximations. It does not replace 3D dental models, study casts, or cephalometric "
+        "orthodontic assessment. All findings require clinical evaluation by a qualified dental professional."
     )
     insufficient_data_reason: Optional[str] = None
 

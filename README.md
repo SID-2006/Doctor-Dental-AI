@@ -10,6 +10,13 @@
 
 **Doctor Dental** is a local-first clinical decision support web application built for healthcare and dental diagnostics. It integrates two specialized deep learning models (`enumeration.pt` and `disease.pt`) to simultaneously localize all 32 adult teeth using FDI standard notation, detect primary dental pathologies, correlate lesions with specific teeth via spatial bounding-box overlap, perform comprehensive 2D geometric tooth alignment & orthodontic screening, and compile diagnostic PDF reports.
 
+<p align="center">
+  <img src="docs/images/disease_detection_multiclass.jpg" alt="Doctor Dental Multi-Class Disease Detection" width="850" />
+</p>
+<p align="center">
+  <em>Figure 1: Full-panoramic dental disease detection with YOLO11m, showing localized impacted third molars (cyan), deep caries encroaching the pulp chamber (red), and coronal/interproximal caries (orange) spatially associated with FDI tooth numbers.</em>
+</p>
+
 ---
 
 ## 1. System Overview & Core Capabilities
@@ -31,9 +38,42 @@
   - `2: Periapical_Lesion` — Periapical inflammatory radiolucency / apical periodontitis
   - `3: Deep_Caries` — Advanced carious breakdown approaching or encroaching on the pulp chamber
 
+<p align="center">
+  <img src="docs/images/caries_detection_panoramic.jpg" alt="YOLO11m Panoramic Disease Detection Layer" width="850" />
+</p>
+<p align="center">
+  <em>Figure 2: Panoramic disease detection layer displaying multiple localized carious lesions across maxillary and mandibular dentition with confidence percentages and linked FDI tooth identifiers.</em>
+</p>
+
+#### 🔍 Pathology Detection Close-Ups & Detailed Lesion Analysis
+
+| **Quadrant 3: Deep Caries (`T37`) & Impacted Wisdom Tooth (`T38`)** | **Quadrant 4: Horizontal Impaction (`T48`) & Caries (`T47`)** |
+|:---:|:---:|
+| <img src="docs/images/pathology_deep_caries_and_impacted_q3.jpg" alt="Deep Caries and Impacted Tooth Q3" width="420" /> | <img src="docs/images/pathology_impacted_and_caries_q4.jpg" alt="Impacted Tooth and Caries Q4" width="420" /> |
+| *Severe coronal caries encroaching on the pulp chamber (`T37`, red) accompanied by horizontal third-molar impaction (`T38`, cyan) and adjacent coronal caries (`T36`, `T35`).* | *Severe horizontal impaction of mandibular third molar (`T48`, cyan) wedged against adjacent second molar (`T47`, orange) with coronal demineralization.* |
+
+| **Quadrant 1: Maxillary Caries (`T16`, `T17`) & Impaction (`T18`)** | **Quadrant 2: Maxillary Caries (`T25`, `T26`) & Impaction (`T27`)** |
+|:---:|:---:|
+| <img src="docs/images/pathology_caries_q1.jpg" alt="Maxillary Caries and Impaction Q1" width="420" /> | <img src="docs/images/pathology_caries_q2.jpg" alt="Maxillary Caries and Impaction Q2" width="420" /> |
+| *Occlusal and interproximal carious lesions on first and second molars (`T16`, `T17`) with unerupted impacted third molar (`T18`).* | *Interproximal caries detected on premolar and molar (`T25`, `T26`) alongside angulated impacted third molar (`T27`).* |
+
 ### 📐 Spatial Overlap & Anatomical Association Engine
 - Computes Intersection over Lesion Area ($\text{IoA} \ge 0.20$) to associate detected lesions directly with their corresponding FDI tooth numbers.
 - Incorporates vertical root tolerance to reliably capture periapical lesions extending beyond the anatomical root boundary.
+
+<p align="center">
+  <img src="docs/images/annotated_enumeration_and_disease.jpg" alt="Dual Model Spatial Overlap and FDI Tooth Association" width="850" />
+</p>
+<p align="center">
+  <em>Figure 3: Dual-model fusion visualization — simultaneous 32-tooth FDI enumeration (cyan) and disease pathology detection (orange) demonstrating spatial IoA bounding-box association.</em>
+</p>
+
+#### 🔄 Multi-Layer Radiograph Pipeline Breakdown
+
+| 1. Raw OPG Radiograph | 2. FDI Tooth Enumeration Map | 3. YOLO11m Pathology Layer |
+|:---:|:---:|:---:|
+| <img src="docs/images/original_panoramic.jpg" alt="Original Panoramic Radiograph" width="280" /> | <img src="docs/images/teeth_enumeration_only.jpg" alt="FDI Tooth Enumeration Only" width="280" /> | <img src="docs/images/caries_detection_panoramic.jpg" alt="Pathology Detection Only" width="280" /> |
+| *Input panoramic radiograph* | *32 anatomical tooth boundaries* | *Isolated pathology detection boxes* |
 
 ---
 
@@ -170,6 +210,8 @@ Dr.dental/
 │           ├── HowItWorksPage.tsx
 │           ├── AboutPage.tsx
 │           └── NotFoundPage.tsx
+├── docs/
+│   └── images/                 # Multi-class disease detection, pathology callouts & visual overlays
 ├── start_backend.ps1           # Windows PowerShell backend start script
 ├── start_frontend.ps1          # Windows PowerShell frontend start script
 ├── start_backend.sh            # macOS/Linux backend start script
